@@ -71,12 +71,18 @@ def my_listings_view(request):
     return render(request, 'core/my_listing.html', context=context)
 
 def filter_residence(request):
-    Categories = request.GET.getlist('category[]')
+    Categories = request.GET.getlist('Category[]')
+    minimum = request.GET.get('minimum')
+    maximum = request.GET.get('maximum')
 
     residences = Residence.objects.filter(Residence_status="published").order_by("-id").distinct()
 
+    if(minimum):
+        residences = residences.filter(price__gt=minimum).distinct()
+    if(maximum):
+        residences = residences.filter(price__lt=maximum).distinct()
     if len(Categories) > 0:
-        residences = residences.filter(Category__id__in=Categories).distinct()
+        residences = residences.filter(category__id__in=Categories).distinct()
 
     
     data = render_to_string("core/async/residence.html", {"Residences": residences})
